@@ -1,0 +1,72 @@
+---
+- name: Initialize report on controller
+  hosts: localhost
+  strategy: linear
+  connection: local
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Allocate unique controller run identity
+      package_hold_report:
+        action: init
+      register: package_hold_report_identity
+    - name: Freeze identity and target coverage
+      ansible.builtin.set_fact:
+        package_hold_report_run_id: "{{ package_hold_report_identity.run_id }}"
+        package_hold_report_frozen_targets: "{{ package_hold_report_targets | default(groups['package_hold_targets']) }}"
+
+- name: Gather managed host observations
+  hosts: package_hold_targets
+  gather_facts: false
+  # Keep the final localhost writer reachable even when every target is offline.
+  ignore_unreachable: true
+  become: "{{ package_hold_report_become | default(true) }}"
+  serial: "{{ package_hold_report_serial | default('100%') }}"
+  strategy: linear
+  tasks:
+    - name: Audit or remediate prerequisites
+      ansible.builtin.include_role:
+        name: package_hold_prerequisites
+      when: package_hold_report_phase | default('hold') == 'prerequisites'
+    - name: Audit or ensure holds
+      ansible.builtin.include_role:
+        name: package_hold_control
+      when: package_hold_report_phase | default('hold') == 'hold'
+
+- name: Finalize one report after all managed batches
+  hosts: localhost
+  strategy: linear
+  connection: local
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Initialize complete host coverage mapping
+      ansible.builtin.set_fact:
+        package_hold_report_records: {}
+    - name: Collect only current-run results for every frozen host
+      ansible.builtin.set_fact:
+        package_hold_report_records: >-
+          {{ package_hold_report_records | combine({item: {
+            'result': hostvars[item]['package_hold_prerequisites_result'] | default({})
+              if package_hold_report_phase | default('hold') == 'prerequisites'
+              else hostvars[item]['package_hold_control_result'] | default({}),
+            'os': hostvars[item]['package_hold_control_platform']['os'] | default({})}}) }}
+      loop: "{{ package_hold_report_frozen_targets }}"
+    - name: Atomically write complete CSV documents once  # noqa: run_once[task] run-once[task]
+      package_hold_report:
+        action: finalize
+        run_id: "{{ package_hold_report_run_id }}"
+        report_root: "{{ package_hold_report_root | default(playbook_dir ~ '/../reports') }}"
+        phase: "{{ package_hold_report_phase | default('hold') }}"
+        hosts: "{{ package_hold_report_records }}"
+      run_once: true
+      delegate_to: localhost
+      become: false
+      register: package_hold_report_final
+    - name: Show report location
+      ansible.builtin.debug:
+        var: package_hold_report_final.report_directory
+    - name: Fail after writing report when coverage or checks failed
+      ansible.builtin.assert:
+        that: package_hold_report_final.success
+        fail_msg: "Host check failed; inspect hosts.csv and the package/capability CSV."

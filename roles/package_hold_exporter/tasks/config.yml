@@ -1,0 +1,64 @@
+---
+- name: config.yml - Render scanner config from shared resolved inventory
+  ansible.builtin.template:
+    src: config.json.j2
+    dest: "{{ package_hold_exporter_config_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - package_hold_exporter Restart HTTP
+    - package_hold_exporter Refresh cache
+- name: config.yml - Install scanner and independent HTTP units
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - package-hold-scan.service
+    - package-hold-scan.timer
+    - package-hold-exporter.service
+  notify:
+    - package_hold_exporter Reload systemd
+    - package_hold_exporter Restart timer
+    - package_hold_exporter Restart HTTP
+    - package_hold_exporter Refresh cache
+- name: config.yml - Create Zabbix include directory
+  ansible.builtin.file:
+    path: "{{ package_hold_exporter_zabbix_include_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: package_hold_exporter_zabbix_enabled
+- name: config.yml - Install cache-only Zabbix integration
+  ansible.builtin.template:
+    src: package-hold.conf.j2
+    dest: "{{ package_hold_exporter_zabbix_include_dir }}/package-hold.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  when: package_hold_exporter_zabbix_enabled
+  notify: package_hold_exporter Restart Zabbix
+- name: config.yml - Remove disabled Zabbix integration
+  ansible.builtin.file:
+    path: "{{ package_hold_exporter_zabbix_include_dir }}/package-hold.conf"
+    state: absent
+  when: not package_hold_exporter_zabbix_enabled
+  notify: package_hold_exporter Restart Zabbix
+- name: config.yml - Apply unit changes before enabling
+  ansible.builtin.meta: flush_handlers
+- name: config.yml - Enable scanner timer
+  ansible.builtin.systemd:
+    name: package-hold-scan.timer
+    enabled: true
+    state: started
+  when: not ansible_check_mode
+- name: config.yml - Enable HTTP reader
+  ansible.builtin.systemd:
+    name: package-hold-exporter.service
+    enabled: true
+    state: started
+  when: not ansible_check_mode

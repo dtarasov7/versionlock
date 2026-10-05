@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "scan_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "boot_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "config_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "last_attempt_at": {
+      "type": "number",
+      "minimum": 0
+    },
+    "last_completed_at": {
+      "type": "number",
+      "minimum": 0
+    },
+    "last_success_at": {
+      "type": "number",
+      "minimum": 0
+    },
+    "scan_success": {
+      "type": "boolean"
+    },
+    "scan_duration_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "package": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.+-]{0,254}$"
+          },
+          "method": {
+            "enum": [
+              "dnf_versionlock",
+              "dpkg_selections",
+              "alt_rpm_hold"
+            ]
+          },
+          "state": {
+            "enum": [
+              "held",
+              "unheld",
+              "unknown"
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "unheld_streak": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unheld_since": {
+            "type": "number",
+            "minimum": 0
+          },
+          "persistent_unheld": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "package",
+          "method",
+          "state",
+          "error",
+          "unheld_streak",
+          "unheld_since",
+          "persistent_unheld"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "error": {
+                  "type": "object"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "scan_id",
+    "boot_id",
+    "config_digest",
+    "last_attempt_at",
+    "last_completed_at",
+    "last_success_at",
+    "scan_success",
+    "scan_duration_seconds",
+    "packages",
+    "errors"
+  ],
+  "additionalProperties": false
+}

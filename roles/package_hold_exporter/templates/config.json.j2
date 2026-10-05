@@ -1,0 +1,7 @@
+{{ {'schema_version': 1, 'os': package_hold_exporter_platform.os.id,
+    'backend': package_hold_exporter_platform.backend, 'packages': package_hold_exporter_resolved,
+    'scan_interval_seconds': package_hold_exporter_scan_interval_seconds | int,
+    'scan_timeout_seconds': package_hold_exporter_scan_timeout_seconds | int,
+    'command_timeout_seconds': package_hold_exporter_command_timeout_seconds | int,
+    'listen_address': package_hold_exporter_listen_address, 'listen_port': package_hold_exporter_listen_port | int,
+    'status_path': package_hold_exporter_status_path} | to_nice_json }}

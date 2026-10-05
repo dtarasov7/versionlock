@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "changed": false,
+  "failed": false,
+  "check_mode": false,
+  "backend": "dpkg_selections",
+  "operation": "query",
+  "packages": [
+    {
+      "id": "nginx",
+      "package": "nginx",
+      "state": "held",
+      "before_state": "held",
+      "changed": false,
+      "would_change": false,
+      "error": null
+    }
+  ],
+  "errors": []
+}

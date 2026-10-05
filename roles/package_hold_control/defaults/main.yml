@@ -1,0 +1,5 @@
+---
+# package_hold_packages is required from inventory; no role-local copy.
+package_hold_control_mode: audit
+package_hold_control_command_timeout_seconds: 30
+package_hold_control_lock_timeout_seconds: 10

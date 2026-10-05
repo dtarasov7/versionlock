@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodic package hold observations
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec={{ package_hold_exporter_scan_interval_seconds }}s
+AccuracySec=1s
+RandomizedDelaySec=0
+Unit=package-hold-scan.service
+
+[Install]
+WantedBy=timers.target

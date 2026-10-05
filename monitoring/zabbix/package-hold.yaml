@@ -1,0 +1,241 @@
+---
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e7a4e90b02dd45da998c8bff2cd654f0
+    name: Templates/Applications
+  templates:
+  - uuid: 27ee434cf283427e99f9a8958d77ddd9
+    template: Package hold by Zabbix agent
+    name: Package hold by Zabbix agent
+    groups:
+    - name: Templates/Applications
+    items:
+    - uuid: e101d0bc9c70443e936274a9d584094e
+      name: Package hold snapshot
+      type: ZABBIX_PASSIVE
+      key: package_hold.snapshot
+      delay: 30s
+      history: '0'
+      value_type: TEXT
+      trends: '0'
+    - uuid: e51913aae49b41d78de0f07dbd4c650e
+      name: cache valid
+      type: DEPENDENT
+      key: package_hold.cache_valid
+      delay: '0'
+      value_type: UNSIGNED
+      master_item:
+        key: package_hold.snapshot
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.cache_valid
+    - uuid: d4ae735c56354bcabb87581b0b1a6952
+      name: fresh
+      type: DEPENDENT
+      key: package_hold.fresh
+      delay: '0'
+      value_type: UNSIGNED
+      master_item:
+        key: package_hold.snapshot
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.fresh
+    - uuid: 54d797e4762c4052883e450b870e4a65
+      name: scan success
+      type: DEPENDENT
+      key: package_hold.scan_success
+      delay: '0'
+      value_type: UNSIGNED
+      master_item:
+        key: package_hold.snapshot
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.scan_success
+    - uuid: 5baecc3e1c6e4327aca7c6b63998c6f7
+      name: last attempt
+      type: DEPENDENT
+      key: package_hold.last_attempt
+      units: unixtime
+      delay: '0'
+      value_type: FLOAT
+      master_item:
+        key: package_hold.snapshot
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.last_attempt
+    - uuid: 992626fefcd9471f946958a58e5f2c5d
+      name: last completed
+      type: DEPENDENT
+      key: package_hold.last_completed
+      units: unixtime
+      delay: '0'
+      value_type: FLOAT
+      master_item:
+        key: package_hold.snapshot
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.last_completed
+    - uuid: 23c28d0c44ce400aa9b0378a38bd538b
+      name: last success
+      type: DEPENDENT
+      key: package_hold.last_success
+      units: unixtime
+      delay: '0'
+      value_type: FLOAT
+      master_item:
+        key: package_hold.snapshot
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.last_success
+    - uuid: d6ea006cae8d487d8b4589e176c813d9
+      name: duration
+      type: DEPENDENT
+      key: package_hold.duration
+      units: s
+      delay: '0'
+      value_type: FLOAT
+      master_item:
+        key: package_hold.snapshot
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.duration
+    - uuid: b7e3821caa3e4ec58584003c17964f18
+      name: interval
+      type: DEPENDENT
+      key: package_hold.interval
+      units: s
+      delay: '0'
+      value_type: UNSIGNED
+      master_item:
+        key: package_hold.snapshot
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.interval
+    - uuid: 4ff7b2421f474872a46a782a77b34f35
+      name: stale after
+      type: DEPENDENT
+      key: package_hold.stale_after
+      units: s
+      delay: '0'
+      value_type: UNSIGNED
+      master_item:
+        key: package_hold.snapshot
+      preprocessing:
+      - type: JSONPATH
+        parameters:
+        - $.stale_after
+    discovery_rules:
+    - uuid: 6127539d2fdf4e72a18e4c48025d71c3
+      name: Installed monitored packages
+      type: DEPENDENT
+      key: package_hold.discovery
+      delay: '0'
+      lifetime: 1d
+      enabled_lifetime_type: DISABLE_IMMEDIATELY
+      master_item:
+        key: package_hold.snapshot
+      preprocessing:
+      - type: JAVASCRIPT
+        parameters:
+        - var s = JSON.parse(value); if (s.discovery_valid !== 1) { throw "Inventory unavailable"; } return JSON.stringify(s.packages);
+        error_handler: DISCARD_VALUE
+      lld_macro_paths:
+      - lld_macro: '{#PACKAGE_ID}'
+        path: $.id
+      - lld_macro: '{#PACKAGE}'
+        path: $.package
+      - lld_macro: '{#METHOD}'
+        path: $.method
+      item_prototypes:
+      - uuid: 2cd49be887a34c98bfee0690cec8697f
+        name: '{#PACKAGE_ID}: status'
+        type: DEPENDENT
+        key: package_hold.status[{#PACKAGE_ID}]
+        delay: '0'
+        value_type: UNSIGNED
+        master_item:
+          key: package_hold.snapshot
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - var p = JSON.parse(value).packages; for (var i = 0; i < p.length; i++) { if (p[i].id === "{#PACKAGE_ID}")
+            { if (p[i].status === null) { throw "unknown"; } return p[i].status; } } throw "not discovered";
+          error_handler: DISCARD_VALUE
+      - uuid: 4d490e9a0cf54092960c96f7e15902b7
+        name: '{#PACKAGE_ID}: check_success'
+        type: DEPENDENT
+        key: package_hold.check_success[{#PACKAGE_ID}]
+        delay: '0'
+        value_type: UNSIGNED
+        master_item:
+          key: package_hold.snapshot
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - var p = JSON.parse(value).packages; for (var i = 0; i < p.length; i++) { if (p[i].id === "{#PACKAGE_ID}")
+            { if (p[i].check_success === null) { throw "unknown"; } return p[i].check_success; } } throw
+            "not discovered";
+          error_handler: DISCARD_VALUE
+        trigger_prototypes:
+        - uuid: a0f87b35fe264490aaf8190628456610
+          name: 'Hold check failed: {#PACKAGE_ID}'
+          expression: max(/Package hold by Zabbix agent/package_hold.check_success[{#PACKAGE_ID}],1m)=0
+            and last(/Package hold by Zabbix agent/package_hold.fresh)=1
+            and now()>=last(/Package hold by Zabbix agent/package_hold.last_completed)
+            and now()-last(/Package hold by Zabbix agent/package_hold.last_completed)<=last(/Package hold by Zabbix agent/package_hold.stale_after)
+            and nodata(/Package hold by Zabbix
+            agent/package_hold.snapshot,2m)=0
+          priority: WARNING
+      - uuid: b00210fea05843a191a2b7cbdcc9a7f8
+        name: '{#PACKAGE_ID}: persistent'
+        type: DEPENDENT
+        key: package_hold.persistent[{#PACKAGE_ID}]
+        delay: '0'
+        value_type: UNSIGNED
+        master_item:
+          key: package_hold.snapshot
+        preprocessing:
+        - type: JAVASCRIPT
+          parameters:
+          - var p = JSON.parse(value).packages; for (var i = 0; i < p.length; i++) { if (p[i].id === "{#PACKAGE_ID}")
+            { if (p[i].persistent === null) { throw "unknown"; } return p[i].persistent; } } return 0;
+          error_handler: DISCARD_VALUE
+        trigger_prototypes:
+        - uuid: ab292f9c5b1243d58b89bfa8d3e0a093
+          name: 'Persistent unheld: {#PACKAGE_ID}'
+          expression: min(/Package hold by Zabbix agent/package_hold.persistent[{#PACKAGE_ID}],1m)=1 and
+            last(/Package hold by Zabbix agent/package_hold.fresh)=1 and last(/Package hold by Zabbix
+            agent/package_hold.cache_valid)=1 and now()-last(/Package hold by Zabbix agent/package_hold.last_completed)<=last(/Package
+            hold by Zabbix agent/package_hold.stale_after)
+            and now()>=last(/Package hold by Zabbix agent/package_hold.last_completed)
+            and nodata(/Package hold by Zabbix agent/package_hold.snapshot,2m)=0
+          priority: WARNING
+  triggers:
+  - uuid: 2a868e986fae4e368978889ee81ac3c4
+    name: Scanner failed
+    expression: max(/Package hold by Zabbix agent/package_hold.scan_success,1m)=0 and nodata(/Package
+      hold by Zabbix agent/package_hold.snapshot,2m)=0
+    priority: WARNING
+  - uuid: e0f8ec675e5548128865fdfb1c403cb3
+    name: Scanner stale
+    expression: max(/Package hold by Zabbix agent/package_hold.fresh,1m)=0 or now()-last(/Package hold
+      by Zabbix agent/package_hold.last_completed)>last(/Package hold by Zabbix agent/package_hold.stale_after)
+      and last(/Package hold by Zabbix agent/package_hold.last_completed)>0
+    priority: WARNING
+  - uuid: 8dae68559a16428487b0bf0dd2b0b0cc
+    name: Cache invalid
+    expression: max(/Package hold by Zabbix agent/package_hold.cache_valid,1m)=0
+    priority: WARNING
+  - uuid: 9e44a9ec770b42d2a25d23491590d6fe
+    name: Agent snapshot unavailable
+    expression: nodata(/Package hold by Zabbix agent/package_hold.snapshot,2m)=1
+    priority: WARNING

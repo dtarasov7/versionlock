@@ -1,0 +1,32 @@
+---
+- name: package_hold_exporter Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: not ansible_check_mode
+- name: package_hold_exporter Restart timer
+  ansible.builtin.systemd:
+    name: package-hold-scan.timer
+    state: restarted
+  when:
+    - package_hold_exporter_state == 'present'
+    - not ansible_check_mode
+- name: package_hold_exporter Restart HTTP
+  ansible.builtin.systemd:
+    name: package-hold-exporter.service
+    state: restarted
+  when:
+    - package_hold_exporter_state == 'present'
+    - not ansible_check_mode
+- name: package_hold_exporter Refresh cache
+  ansible.builtin.systemd:
+    name: package-hold-scan.service
+    state: started
+    no_block: true
+  when:
+    - package_hold_exporter_state == 'present'
+    - not ansible_check_mode
+- name: package_hold_exporter Restart Zabbix
+  ansible.builtin.systemd:
+    name: "{{ package_hold_exporter_zabbix_service }}"
+    state: restarted
+  when: not ansible_check_mode

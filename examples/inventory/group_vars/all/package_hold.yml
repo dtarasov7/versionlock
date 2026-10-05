@@ -1,0 +1,22 @@
+---
+package_hold_packages:
+  - id: nginx
+    names:
+      redos: nginx
+      astra: nginx
+      alt: nginx
+  - id: java17
+    names:
+      redos: java-17-openjdk
+      astra: openjdk-17-jre
+      alt: java-17-openjdk
+  - id: postgresql
+    names:
+      redos: postgresql-server
+      astra: postgresql
+      alt: postgresql-server
+  - id: astra_specific
+    names:
+      redos: null
+      astra: astra-safepolicy
+      alt: null

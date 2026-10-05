@@ -1,0 +1,206 @@
+---
+# Проверено 2026-10-04 по бинарным индексам x86_64/amd64 и noarch/all:
+# РЕД ОС 7.3 standard (os/updates и отмеченные ниже 3rdparty),
+# ALT 10 (p10), Astra Linux SE 1.7 (stable main/base/extended/update).
+# Источники, варианты и полный список ПО: package_hold_packages.md.
+# null: пакет не найден в проверенных индексах; hold для этой ОС пропущен.
+# Это не утверждение об отсутствии пакета в сторонних или закрытых репозиториях.
+# Prometheus: выбран пакет 2.x; hold сам не проверяет major установленной версии.
+# В ALT выбран Kubernetes/CRI 1.28; для 1.25/1.26/1.27 замените суффиксы.
+# PostgreSQL: пример серверов РЕД ОС 12 / Astra 11 / ALT 13; другие major — в MD.
+# VictoriaMetrics: single-node; OTel Collector: contrib; GitLab: CE.
+# Не найдены во всех проверенных ОС: elasticsearch-exporter, Jaeger,
+# Data Prepper, Postgres Pro. Их нет в активном списке: all-null запрещён схемой.
+# Для этих продуктов требуется отдельная проверка репозитория поставщика.
+package_hold_packages:
+  - id: nginx
+    names:
+      redos: nginx
+      astra: nginx
+      alt: nginx
+  - id: nginx_core
+    names:
+      redos: nginx-core
+      astra: nginx-core
+      alt: null
+  - id: angie
+    names:
+      redos: angie
+      astra: null
+      alt: null
+  - id: haproxy
+    names:
+      redos: haproxy
+      astra: haproxy
+      alt: haproxy
+  - id: grafana
+    names:
+      redos: grafana
+      astra: grafana
+      alt: grafana
+  - id: prometheus
+    names:
+      redos: golang-github-prometheus-2
+      astra: null
+      alt: prometheus
+  - id: opensearch
+    names:
+      redos: opensearch
+      astra: null
+      alt: opensearch
+  - id: opensearch_dashboards
+    names:
+      redos: opensearch-dashboards
+      astra: null
+      alt: null
+  - id: redis
+    names:
+      redos: redis
+      astra: redis-server
+      alt: redis
+  - id: kafka
+    names:
+      redos: apache-kafka
+      astra: null
+      alt: kafka
+  - id: zookeeper
+    names:
+      redos: zookeeper
+      astra: null
+      alt: null
+  - id: zookeeper_java
+    names:
+      redos: zookeeper-java
+      astra: null
+      alt: null
+  - id: alertmanager
+    names:
+      redos: golang-github-prometheus-alertmanager
+      astra: prometheus-alertmanager
+      alt: prometheus-alertmanager
+  - id: victoriametrics
+    names:
+      redos: victoria-metrics-singlenode
+      astra: null
+      alt: victoriametrics
+  - id: exporter_exporter
+    names:
+      redos: exporter_exporter
+      astra: null
+      alt: null
+  - id: process_exporter
+    names:
+      redos: golang-github-ncabatoff-process-exporter
+      astra: null
+      alt: null
+  - id: node_exporter
+    names:
+      redos: prometheus-node_exporter
+      astra: prometheus-node-exporter
+      alt: prometheus-node_exporter
+  - id: kafka_exporter
+    names:
+      redos: golang-github-danielqsj-kafka-exporter
+      astra: null
+      alt: null
+  - id: kubeadm
+    names:
+      redos: kubernetes-kubeadm
+      astra: kubernetes-admin
+      alt: kubernetes1.28-kubeadm
+  - id: kubelet
+    names:
+      redos: kubernetes-node
+      astra: kubernetes-node
+      alt: kubernetes1.28-kubelet
+  - id: kubectl
+    names:
+      redos: kubernetes-client
+      astra: kubernetes-client
+      alt: kubernetes1.28-client
+  - id: containerd
+    names:
+      redos: containerd
+      astra: containerd
+      alt: containerd
+  - id: crictl
+    names:
+      redos: cri-tools
+      astra: cri-tools
+      alt: cri-tools1.28
+  - id: docker
+    names:
+      redos: docker-ce
+      astra: docker.io
+      alt: docker-engine
+  - id: docker_cli
+    names:
+      redos: docker-ce-cli
+      astra: null
+      alt: docker-cli
+  - id: otel_collector
+    names:
+      redos: opentelemetry-collector-contrib
+      astra: null
+      alt: null
+  - id: postgres
+    names:
+      redos: postgresql-server
+      astra: postgresql-11
+      alt: postgresql13-server
+  - id: consul
+    names:
+      redos: consul
+      astra: null
+      alt: consul
+  - id: etcd
+    names:
+      redos: etcd
+      astra: etcd-server
+      alt: etcd
+  - id: vault
+    names:
+      redos: vault
+      astra: null
+      alt: vault
+  # РЕД ОС: требуется отдельно подключённый 3rdparty/gitlab.
+  - id: gitlab
+    names:
+      redos: gitlab-ce
+      astra: null
+      alt: null
+  # РЕД ОС: требуется отдельно подключённый 3rdparty/nexus.
+  - id: nexus
+    names:
+      redos: nexus
+      astra: null
+      alt: null
+  - id: keepalived
+    names:
+      redos: keepalived
+      astra: keepalived
+      alt: keepalived
+  # РЕД ОС: требуется отдельно подключённый 3rdparty/clickhouse.
+  - id: clickhouse_server
+    names:
+      redos: clickhouse-server
+      astra: null
+      alt: clickhouse-server
+  # РЕД ОС: требуется отдельно подключённый 3rdparty/clickhouse.
+  - id: clickhouse_client
+    names:
+      redos: clickhouse-client
+      astra: null
+      alt: clickhouse-client
+  # РЕД ОС: требуется отдельно подключённый 3rdparty/clickhouse.
+  - id: clickhouse_common
+    names:
+      redos: clickhouse-common-static
+      astra: null
+      alt: clickhouse-common-static
+  # Старое имя из os; новое имя из updates — kafka_exporter выше.
+  - id: kafka_exporter_legacy
+    names:
+      redos: kafka-exporter
+      astra: null
+      alt: null

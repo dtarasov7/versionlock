@@ -1,0 +1,38 @@
+---
+- name: main.yml - Clear previous observations for this run
+  ansible.builtin.set_fact:
+    package_hold_control_result:
+      run_id: '{{ hostvars[''localhost''].package_hold_report_run_id | default(''standalone'') }}'
+      changed: false
+      failed: true
+      errors:
+      - code: missing_result
+        message: Host observation has not completed
+      packages: []
+- name: main.yml - Run hold role and preserve failure coverage
+  block:
+  - name: main.yml - pre-req
+    ansible.builtin.import_tasks: pre-req.yml
+    tags:
+    - pre-req
+  - name: main.yml - config
+    ansible.builtin.import_tasks: config.yml
+    tags:
+    - config
+  rescue:
+  - name: main.yml - Record host error for final report
+    ansible.builtin.set_fact:
+      package_hold_control_result: '{{ (package_hold_control_result | default({}) if package_hold_control_result.run_id
+        | default('''') == (hostvars[''localhost''].package_hold_report_run_id | default(''standalone'')) else {})
+        | combine({''run_id'': hostvars[''localhost''].package_hold_report_run_id | default(''standalone''), ''failed'':
+        true, ''success'': false, ''errors'': [{''code'': (''host_unreachable'' if package_hold_control_platform.unreachable | default(false) else ''configuration_invalid''), ''message'': ansible_failed_result.msg
+        | default(''Host role failed'') | string}]}) }}'
+  - name: main.yml - Fail standalone execution
+    ansible.builtin.fail:
+      msg: '{{ ansible_failed_result.msg | default(''Host role failed'') }}'
+    when: hostvars['localhost'].package_hold_report_run_id is not defined
+- name: main.yml - clean
+  ansible.builtin.import_tasks: clean.yml
+  tags:
+  - never
+  - clean

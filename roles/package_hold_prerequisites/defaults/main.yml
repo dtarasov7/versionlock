@@ -1,0 +1,5 @@
+---
+# package_hold_packages is required from inventory; no role-local copy.
+package_hold_prerequisites_mode: audit
+package_hold_prerequisites_command_timeout_seconds: 30
+package_hold_prerequisites_dnf_plugin_package: python3-dnf-plugin-versionlock

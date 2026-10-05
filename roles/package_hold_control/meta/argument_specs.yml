@@ -1,0 +1,25 @@
+---
+argument_specs:
+  main:
+    short_description: package hold control
+    options:
+      package_hold_packages:
+        type: list
+        elements: dict
+        required: true
+        description: Single shared inventory; all OS mappings required.
+      package_hold_control_mode:
+        type: str
+        default: audit
+        description: mode
+        choices:
+        - audit
+        - remediate
+      package_hold_control_command_timeout_seconds:
+        type: int
+        default: 30
+        description: command timeout seconds
+      package_hold_control_lock_timeout_seconds:
+        type: int
+        default: 10
+        description: lock timeout seconds

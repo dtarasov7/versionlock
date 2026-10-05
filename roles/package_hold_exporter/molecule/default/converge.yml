@@ -1,0 +1,19 @@
+---
+- name: Converge native hold role
+  hosts: all
+  gather_facts: false
+  vars:
+    package_hold_packages:
+    - id: bash
+      names: {redos: bash, astra: bash, alt: bash}
+    - id: absent
+      names: {redos: versiolock-nonexistent-test, astra: versiolock-nonexistent-test, alt: versiolock-nonexistent-test}
+    package_hold_prerequisites_mode: remediate
+    package_hold_prerequisites_command_timeout_seconds: 180
+  tasks:
+  - name: Install native prerequisites on disposable target
+    ansible.builtin.include_role:
+      name: package_hold_prerequisites
+  - name: Converge target role
+    ansible.builtin.include_role:
+      name: package_hold_exporter

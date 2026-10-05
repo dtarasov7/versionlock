@@ -1,0 +1,29 @@
+---
+- name: main.yml - pre-req
+  ansible.builtin.import_tasks: pre-req.yml
+  tags: [pre-req]
+- name: main.yml - user
+  ansible.builtin.import_tasks: user.yml
+  when: package_hold_exporter_state == 'present'
+  tags: [user]
+- name: main.yml - install
+  ansible.builtin.import_tasks: install.yml
+  when: package_hold_exporter_state == 'present'
+  tags: [install]
+- name: main.yml - config
+  ansible.builtin.include_tasks:
+    file: config.yml
+    apply:
+      tags: [config]
+  when: package_hold_exporter_state == 'present'
+  tags: [config]
+- name: main.yml - Remove exporter on requested absence
+  ansible.builtin.include_tasks:
+    file: remove.yml
+    apply:
+      tags: [config]
+  when: package_hold_exporter_state == 'absent'
+  tags: [config]
+- name: main.yml - clean
+  ansible.builtin.import_tasks: clean.yml
+  tags: [never, clean]

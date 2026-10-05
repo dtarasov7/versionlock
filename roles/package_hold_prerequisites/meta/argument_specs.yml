@@ -1,0 +1,25 @@
+---
+argument_specs:
+  main:
+    short_description: package hold prerequisites
+    options:
+      package_hold_packages:
+        type: list
+        elements: dict
+        required: true
+        description: Single shared inventory; all OS mappings required.
+      package_hold_prerequisites_mode:
+        type: str
+        default: audit
+        description: mode
+        choices:
+        - audit
+        - remediate
+      package_hold_prerequisites_command_timeout_seconds:
+        type: int
+        default: 30
+        description: command timeout seconds
+      package_hold_prerequisites_dnf_plugin_package:
+        type: str
+        default: python3-dnf-plugin-versionlock
+        description: dnf plugin package

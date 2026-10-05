@@ -1,0 +1,12 @@
+---
+- name: Configure package hold and monitoring with local roles
+  hosts: package_hold_targets
+  gather_facts: false
+  become: true
+  vars:
+    package_hold_prerequisites_mode: remediate
+    package_hold_control_mode: remediate
+  roles:
+    - package_hold_prerequisites
+    - package_hold_control
+    - package_hold_exporter

@@ -1,0 +1,17 @@
+---
+# package_hold_packages is required from inventory; no role-local copy.
+package_hold_exporter_state: present
+package_hold_exporter_python: /usr/bin/python3
+package_hold_exporter_scan_interval_seconds: 300
+package_hold_exporter_scan_timeout_seconds: 60
+package_hold_exporter_command_timeout_seconds: 30
+package_hold_exporter_listen_address: 127.0.0.1
+package_hold_exporter_listen_port: 9817
+package_hold_exporter_user: package-hold-exporter
+package_hold_exporter_binary_path: /usr/local/libexec/package-hold-exporter.py
+package_hold_exporter_config_path: /etc/package-hold-exporter/config.json
+package_hold_exporter_status_path: /var/lib/package-hold-exporter/status.json
+package_hold_exporter_zabbix_enabled: false
+package_hold_exporter_zabbix_include_dir: /etc/zabbix/zabbix_agentd.d
+package_hold_exporter_zabbix_service: zabbix-agent
+package_hold_exporter_group: "{{ package_hold_exporter_user }}"

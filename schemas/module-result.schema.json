@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "changed": {
+      "type": "boolean"
+    },
+    "failed": {
+      "type": "boolean"
+    },
+    "check_mode": {
+      "type": "boolean"
+    },
+    "backend": {
+      "enum": [
+        "dnf_versionlock",
+        "dpkg_selections",
+        "alt_rpm_hold",
+        null
+      ]
+    },
+    "operation": {
+      "enum": [
+        "query",
+        "held",
+        "unheld"
+      ]
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "package": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.+-]{0,254}$"
+          },
+          "state": {
+            "enum": [
+              "held",
+              "unheld",
+              "unknown"
+            ]
+          },
+          "before_state": {
+            "enum": [
+              "held",
+              "unheld",
+              "unknown"
+            ]
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "would_change": {
+            "type": "boolean"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "package",
+          "state",
+          "before_state",
+          "changed",
+          "would_change",
+          "error"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "error": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "changed",
+    "failed",
+    "check_mode",
+    "backend",
+    "operation",
+    "packages",
+    "errors"
+  ],
+  "additionalProperties": false
+}

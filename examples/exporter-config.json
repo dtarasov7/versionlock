@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "os": "astra",
+  "backend": "dpkg_selections",
+  "packages": [
+    {
+      "id": "java17",
+      "name": "openjdk-17-jre"
+    }
+  ],
+  "scan_interval_seconds": 300,
+  "scan_timeout_seconds": 60,
+  "command_timeout_seconds": 30,
+  "listen_address": "127.0.0.1",
+  "listen_port": 9817,
+  "status_path": "/var/lib/package-hold-exporter/status.json"
+}

@@ -1,0 +1,73 @@
+---
+argument_specs:
+  main:
+    short_description: package hold exporter
+    options:
+      package_hold_packages:
+        type: list
+        elements: dict
+        required: true
+        description: Single shared inventory; all OS mappings required.
+      package_hold_exporter_state:
+        type: str
+        default: present
+        description: state
+        choices:
+        - present
+        - absent
+      package_hold_exporter_python:
+        type: str
+        default: /usr/bin/python3
+        description: python
+      package_hold_exporter_scan_interval_seconds:
+        type: int
+        default: 300
+        description: scan interval seconds
+      package_hold_exporter_scan_timeout_seconds:
+        type: int
+        default: 60
+        description: scan timeout seconds
+      package_hold_exporter_command_timeout_seconds:
+        type: int
+        default: 30
+        description: command timeout seconds
+      package_hold_exporter_listen_address:
+        type: str
+        default: 127.0.0.1
+        description: listen address
+      package_hold_exporter_listen_port:
+        type: int
+        default: 9817
+        description: listen port
+      package_hold_exporter_user:
+        type: str
+        default: package-hold-exporter
+        description: user
+      package_hold_exporter_binary_path:
+        type: str
+        default: /usr/local/libexec/package-hold-exporter.py
+        description: binary path
+      package_hold_exporter_config_path:
+        type: str
+        default: /etc/package-hold-exporter/config.json
+        description: config path
+      package_hold_exporter_status_path:
+        type: str
+        default: /var/lib/package-hold-exporter/status.json
+        description: status path
+      package_hold_exporter_zabbix_enabled:
+        type: bool
+        default: false
+        description: zabbix enabled
+      package_hold_exporter_zabbix_include_dir:
+        type: str
+        default: /etc/zabbix/zabbix_agentd.d
+        description: zabbix include dir
+      package_hold_exporter_zabbix_service:
+        type: str
+        default: zabbix-agent
+        description: zabbix service
+      package_hold_exporter_group:
+        type: str
+        default: '{{ package_hold_exporter_user }}'
+        description: group

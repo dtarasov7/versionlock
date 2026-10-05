@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "os": {
+      "enum": [
+        "redos",
+        "astra",
+        "alt"
+      ]
+    },
+    "backend": {
+      "enum": [
+        "dnf_versionlock",
+        "dpkg_selections",
+        "alt_rpm_hold"
+      ]
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.+-]{0,254}$"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1024
+    },
+    "scan_interval_seconds": {
+      "type": "integer",
+      "minimum": 60
+    },
+    "scan_timeout_seconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "command_timeout_seconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "listen_address": {
+      "type": "string",
+      "minLength": 1
+    },
+    "listen_port": {
+      "type": "integer",
+      "minimum": 1024,
+      "maximum": 65535
+    },
+    "status_path": {
+      "type": "string",
+      "pattern": "^/"
+    }
+  },
+  "required": [
+    "schema_version",
+    "os",
+    "backend",
+    "packages",
+    "scan_interval_seconds",
+    "scan_timeout_seconds",
+    "command_timeout_seconds",
+    "listen_address",
+    "listen_port",
+    "status_path"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "os": {
+            "const": "redos"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "backend": {
+            "const": "dnf_versionlock"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "os": {
+            "const": "astra"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "backend": {
+            "const": "dpkg_selections"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "os": {
+            "const": "alt"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "backend": {
+            "const": "alt_rpm_hold"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+---
+# Controller aggregation contract with serial batches and a stale cached result.
+- name: Initialize integration report
+  hosts: localhost
+  strategy: linear
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Init unique report
+      package_hold_report:
+        action: init
+      register: package_hold_test_init
+    - name: Freeze identity
+      ansible.builtin.set_fact:
+        package_hold_test_run_id: "{{ package_hold_test_init.run_id }}"
+- name: Generate structured host results in separate batches
+  hosts: package_hold_targets
+  gather_facts: false
+  serial: 1
+  tasks:
+    - name: Save installed-only fixture result
+      ansible.builtin.set_fact:
+        package_hold_test_result:
+          run_id: "{{ hostvars['localhost'].package_hold_test_run_id }}"
+          failed: false
+          check_mode: false
+          backend: dpkg_selections
+          errors: []
+          packages:
+            - id: nginx
+              package: nginx
+              state: held
+              before_state: held
+              changed: false
+              would_change: false
+              error: null
+- name: Finalize one CSV and verify complete batches
+  hosts: localhost
+  strategy: linear
+  gather_facts: false
+  connection: local
+  tasks:
+    - name: Collect both batches and missing-host coverage
+      ansible.builtin.set_fact:
+        package_hold_test_hosts:
+          first:
+            result: "{{ hostvars['first'].package_hold_test_result }}"
+            os: {id: astra}
+          second:
+            result: "{{ hostvars['second'].package_hold_test_result }}"
+            os: {id: astra}
+          unreachable: {}
+    - name: Write final CSVs once  # noqa: run_once[task] run-once[task]
+      package_hold_report:
+        action: finalize
+        run_id: "{{ package_hold_test_run_id }}"
+        report_root: "{{ playbook_dir }}/../../.build/integration-reports"
+        hosts: "{{ package_hold_test_hosts }}"
+      register: package_hold_test_final
+      run_once: true
+      delegate_to: localhost
+      become: false
+    - name: Assert missing coverage was recognized
+      ansible.builtin.assert:
+        that: not package_hold_test_final.success
+    - name: Read generated CSV
+      ansible.builtin.slurp:
+        src: "{{ package_hold_test_final.report_directory }}/hold.csv"
+      register: package_hold_test_csv
+      when: not ansible_check_mode
+    - name: Verify both batches exist in one file
+      ansible.builtin.assert:
+        that:
+          - "'first' in (package_hold_test_csv.content | b64decode)"
+          - "'second' in (package_hold_test_csv.content | b64decode)"
+          - "'unreachable' not in (package_hold_test_csv.content | b64decode)"
+      when: not ansible_check_mode

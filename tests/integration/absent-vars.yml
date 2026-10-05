@@ -1,0 +1,9 @@
+---
+package_hold_report_become: false
+package_hold_report_root: "{{ playbook_dir }}/../.build/native-reports"
+package_hold_packages:
+  - id: absent_fixture
+    names:
+      redos: versiolock-test-package-never-installed
+      astra: versiolock-test-package-never-installed
+      alt: versiolock-test-package-never-installed

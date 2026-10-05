@@ -1,0 +1,5 @@
+---
+- name: clean.yml - Remove role-owned exporter resources
+  ansible.builtin.import_tasks: remove.yml
+- name: clean.yml - End dedicated cleanup play
+  ansible.builtin.meta: end_play

@@ -1,0 +1,60 @@
+---
+- name: Verify native hold behavior
+  hosts: all
+  gather_facts: false
+  vars:
+    package_hold_packages:
+    - id: bash
+      names:
+        redos: bash
+        astra: bash
+        alt: bash
+    package_hold_prerequisites_mode: remediate
+    package_hold_control_mode: remediate
+  tasks:
+  - name: Query final holds
+    ansible.builtin.include_role:
+      name: package_hold_control
+    vars:
+      package_hold_control_mode: audit
+  - name: Assert final state without mutation
+    ansible.builtin.assert:
+      that:
+      - package_hold_control_result.packages[0].state == 'held'
+      - not package_hold_control_result.changed
+  - name: Explicit check-mode unhold
+    package_hold:
+      backend: '{{ package_hold_control_platform.backend }}'
+      packages: '{{ package_hold_control_resolved }}'
+      state: unheld
+    check_mode: true
+    register: package_hold_test_plan
+  - name: Verify truthful planned unhold
+    ansible.builtin.assert:
+      that:
+      - package_hold_test_plan.changed
+      - package_hold_test_plan.packages[0].state == 'held'
+  - name: Remove hold on disposable target and verify native state
+    package_hold:
+      backend: '{{ package_hold_control_platform.backend }}'
+      packages: '{{ package_hold_control_resolved }}'
+      state: unheld
+    register: package_hold_test_unhold
+  - name: Repeat unhold to verify idempotence
+    package_hold:
+      backend: '{{ package_hold_control_platform.backend }}'
+      packages: '{{ package_hold_control_resolved }}'
+      state: unheld
+    register: package_hold_test_unhold_repeat
+  - name: Assert actual unhold and repeated no-change result
+    ansible.builtin.assert:
+      that:
+      - package_hold_test_unhold.changed
+      - package_hold_test_unhold.packages[0].state == 'unheld'
+      - not package_hold_test_unhold_repeat.changed
+  - name: Verify native DNF exact deletion without changing system locklist
+    ansible.builtin.script:
+      cmd: '{{ playbook_dir }}/../../../../tests/integration/dnf-delete.py'
+      executable: /usr/bin/python3
+    changed_when: false
+    when: package_hold_control_platform.backend == 'dnf_versionlock'

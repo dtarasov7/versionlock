@@ -1,0 +1,17 @@
+---
+- name: pre-req.yml - Validate mode and required inventory
+  ansible.builtin.assert:
+    that:
+      - package_hold_control_mode in ['audit', 'remediate']
+      - package_hold_packages is defined
+- name: pre-req.yml - Identify supported OS
+  package_hold_prerequisite:
+    mode: platform
+  register: package_hold_control_platform
+- name: pre-req.yml - Preserve unreachable host as a report failure
+  ansible.builtin.fail:
+    msg: "{{ package_hold_control_platform.msg }}"
+  when: package_hold_control_platform.unreachable | default(false)
+- name: pre-req.yml - Resolve the single inventory
+  ansible.builtin.set_fact:
+    package_hold_control_resolved: "{{ package_hold_packages | package_hold_resolve(ansible_facts.package_hold_platform.id) }}"

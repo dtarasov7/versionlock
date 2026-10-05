@@ -1,0 +1,56 @@
+---
+# Local roles have no Galaxy namespace.
+role_name_check: 2
+driver:
+  name: docker
+platforms:
+- name: versiolock-package-hold-prerequisites-test
+  image: ${MOLECULE_IMAGE}
+  pre_build_image: true
+  privileged: true
+  command: /lib/systemd/systemd
+  tmpfs:
+  - /run
+  - /tmp
+  volumes:
+  - /sys/fs/cgroup:/sys/fs/cgroup:rw
+  cgroupns_mode: host
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_CONFIG: ${MOLECULE_PROJECT_DIRECTORY}/../../ansible.cfg
+    ANSIBLE_LOCAL_TEMP: ${MOLECULE_PROJECT_DIRECTORY}/../../.build/ansible-tmp
+    ANSIBLE_ASYNC_DIR: ${MOLECULE_PROJECT_DIRECTORY}/../../.build/async
+    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..
+    ANSIBLE_LIBRARY: ${MOLECULE_PROJECT_DIRECTORY}/../../library
+    ANSIBLE_MODULE_UTILS: ${MOLECULE_PROJECT_DIRECTORY}/../../module_utils
+    ANSIBLE_FILTER_PLUGINS: ${MOLECULE_PROJECT_DIRECTORY}/../../filter_plugins
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_EPHEMERAL_DIRECTORY}/collections
+  inventory:
+    host_vars:
+      localhost:
+        ansible_async_dir: ${MOLECULE_PROJECT_DIRECTORY}/../../.build/async
+    group_vars:
+      all:
+        ansible_remote_tmp: /tmp/.ansible-package-hold
+        ansible_async_dir: /tmp/.ansible-package-hold-async
+  playbooks:
+    create: ${MOLECULE_PROJECT_DIRECTORY}/../../tests/molecule/create.yml
+    destroy: ${MOLECULE_PROJECT_DIRECTORY}/../../tests/molecule/destroy.yml
+verifier:
+  name: ansible
+scenario:
+  test_sequence:
+  - dependency
+  - destroy
+  - syntax
+  - create
+  - prepare
+  - converge
+  - idempotence
+  - verify
+  - destroy
+dependency:
+  name: galaxy
+  options:
+    requirements-file: molecule/default/requirements.yml

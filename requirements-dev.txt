@@ -1,0 +1,11 @@
+# Reproducible test environment: Python 3.8 and ansible-core 2.13.13.
+-r requirements.txt
+ansible-lint==6.8.7
+ansible-compat==3.0.2
+jsonschema==4.23.0
+yamllint==1.35.1
+molecule==4.0.4
+molecule-plugins[docker]==23.0.0
+docker==7.1.0
+# community.docker 3.4.x bundled adapter is incompatible with requests 2.32+.
+requests==2.31.0

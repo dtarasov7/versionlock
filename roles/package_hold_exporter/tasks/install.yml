@@ -1,0 +1,22 @@
+---
+- name: install.yml - Create owned directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - "{{ package_hold_exporter_binary_path | dirname }}"
+    - "{{ package_hold_exporter_config_path | dirname }}"
+    - "{{ package_hold_exporter_status_path | dirname }}"
+- name: install.yml - Install independent single-file exporter
+  ansible.builtin.copy:
+    src: "{{ role_path }}/../../package-hold-exporter.py"
+    dest: "{{ package_hold_exporter_binary_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+  notify:
+    - package_hold_exporter Restart HTTP
+    - package_hold_exporter Refresh cache

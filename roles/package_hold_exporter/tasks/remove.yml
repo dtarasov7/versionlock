@@ -1,0 +1,50 @@
+---
+- name: remove.yml - Inspect role-owned unit files
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/{{ item }}"
+  loop:
+    - package-hold-scan.timer
+    - package-hold-scan.service
+    - package-hold-exporter.service
+  register: package_hold_exporter_owned_units
+- name: remove.yml - Stop timer first then scanner and HTTP
+  ansible.builtin.systemd:
+    name: "{{ item.item }}"
+    state: stopped
+    enabled: false
+  loop: "{{ package_hold_exporter_owned_units.results }}"
+  when: item.stat.exists
+- name: remove.yml - Remove Zabbix integration
+  ansible.builtin.file:
+    path: "{{ package_hold_exporter_zabbix_include_dir }}/package-hold.conf"
+    state: absent
+  notify: package_hold_exporter Restart Zabbix
+- name: remove.yml - Remove owned units
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item }}"
+    state: absent
+  loop:
+    - package-hold-scan.timer
+    - package-hold-scan.service
+    - package-hold-exporter.service
+  notify: package_hold_exporter Reload systemd
+- name: remove.yml - Remove owned code config cache and runtime lock
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ package_hold_exporter_binary_path }}"
+    - "{{ package_hold_exporter_config_path }}"
+    - "{{ package_hold_exporter_status_path }}"
+    - /run/package-hold-exporter
+- name: remove.yml - Remove dedicated HTTP user
+  ansible.builtin.user:
+    name: "{{ package_hold_exporter_user }}"
+    state: absent
+    remove: false
+- name: remove.yml - Remove dedicated HTTP group
+  ansible.builtin.group:
+    name: "{{ package_hold_exporter_group }}"
+    state: absent
+- name: remove.yml - Apply removal notifications
+  ansible.builtin.meta: flush_handlers

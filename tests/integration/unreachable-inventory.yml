@@ -1,0 +1,18 @@
+---
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
+      ansible_remote_tmp: "{{ inventory_dir }}/../../.build/remote-tmp"
+  vars:
+    package_hold_packages: []
+    package_hold_report_root: "{{ inventory_dir }}/../../.build/unreachable-reports"
+  children:
+    package_hold_targets:
+      hosts:
+        disconnected:
+          ansible_host: 127.0.0.1
+          ansible_port: 1
+          ansible_connection: ssh
+          ansible_connect_timeout: 1

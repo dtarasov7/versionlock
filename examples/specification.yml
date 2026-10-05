@@ -1,0 +1,16 @@
+---
+- name: Exercise local role interfaces
+  hosts: package_hold_targets
+  gather_facts: false
+  vars_files:
+    - inventory/group_vars/all/package_hold.yml
+  tasks:
+    - name: Prerequisites
+      ansible.builtin.import_role:
+        name: package_hold_prerequisites
+    - name: Hold control
+      ansible.builtin.import_role:
+        name: package_hold_control
+    - name: Exporter
+      ansible.builtin.import_role:
+        name: package_hold_exporter

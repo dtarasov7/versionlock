@@ -1,0 +1,25 @@
+---
+- name: Create disposable native systemd containers
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_remote_tmp: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/../../.build/controller-remote"
+  tasks:
+    - name: Create only named scenario containers
+      community.docker.docker_container:
+        name: "{{ package_hold_molecule_platform.name }}"
+        image: "{{ package_hold_molecule_platform.image }}"
+        command: "{{ package_hold_molecule_platform.command }}"
+        state: started
+        privileged: "{{ package_hold_molecule_platform.privileged | default(false) }}"
+        cgroupns_mode: "{{ package_hold_molecule_platform.cgroupns_mode | default('host') }}"
+        tmpfs: "{{ package_hold_molecule_platform.tmpfs | default([]) }}"
+        volumes: "{{ package_hold_molecule_platform.volumes | default([]) }}"
+        labels:
+          owner: versiolock-molecule
+        container_default_behavior: no_defaults
+      loop: "{{ molecule_yml.platforms }}"
+      loop_control:
+        loop_var: package_hold_molecule_platform
+        label: "{{ package_hold_molecule_platform.name }}"

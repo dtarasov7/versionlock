@@ -1,0 +1,18 @@
+---
+- name: Destroy only disposable scenario containers
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_remote_tmp: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/../../.build/controller-remote"
+  tasks:
+    - name: Remove named scenario containers
+      community.docker.docker_container:
+        name: "{{ package_hold_molecule_platform.name }}"
+        state: absent
+        force_kill: true
+        keep_volumes: true
+      loop: "{{ molecule_yml.platforms }}"
+      loop_control:
+        loop_var: package_hold_molecule_platform
+        label: "{{ package_hold_molecule_platform.name }}"

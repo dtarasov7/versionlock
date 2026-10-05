@@ -1,0 +1,4 @@
+# Versions used for verification; roles do not enforce an upper Ansible version limit.
+# Exporter uses only the standard library.
+ansible-core==2.13.13
+PyYAML==6.0.2

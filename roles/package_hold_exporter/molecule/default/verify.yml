@@ -1,0 +1,67 @@
+---
+- name: Verify native hold behavior
+  hosts: all
+  gather_facts: false
+  vars:
+    package_hold_packages:
+    - id: bash
+      names: {redos: bash, astra: bash, alt: bash}
+    - id: absent
+      names: {redos: versiolock-nonexistent-test, astra: versiolock-nonexistent-test, alt: versiolock-nonexistent-test}
+  tasks:
+  - name: Wait for initial scanner cache
+    ansible.builtin.stat:
+      path: /var/lib/package-hold-exporter/status.json
+    register: package_hold_test_cache
+    until: package_hold_test_cache.stat.exists
+    retries: 20
+    delay: 3
+  - name: Read HTTP metrics
+    ansible.builtin.uri:
+      url: http://localhost:9817/metrics
+      return_content: true
+    register: package_hold_test_metrics
+    until: '''package_hold_scan_success 1'' in package_hold_test_metrics.content'
+    retries: 10
+    delay: 2
+  - name: Assert scanner and installed package metrics
+    ansible.builtin.assert:
+      that:
+      - '''package_hold_scan_success 1'' in package_hold_test_metrics.content'
+      - '''package_hold_status{package_id="bash"'' in package_hold_test_metrics.content'
+      - '''package_id="absent"'' not in package_hold_test_metrics.content'
+  - name: Verify cache-only Zabbix discovery
+    ansible.builtin.command:
+      argv:
+      - /usr/bin/python3
+      - /usr/local/libexec/package-hold-exporter.py
+      - zabbix-discovery
+    changed_when: false
+    register: package_hold_test_lld
+  - name: Assert only installed package is discovered
+    ansible.builtin.assert:
+      that:
+      - (package_hold_test_lld.stdout | from_json | length) == 1
+      - (package_hold_test_lld.stdout | from_json)[0]['{' ~ '#PACKAGE_ID}'] == 'bash'
+  - name: Plan absent without stopping services
+    ansible.builtin.include_role:
+      name: package_hold_exporter
+      apply:
+        check_mode: true
+    vars:
+      package_hold_exporter_state: absent
+  - name: Verify HTTP still serves after absent check mode
+    ansible.builtin.uri:
+      url: http://localhost:9817/healthz
+  - name: Remove exporter
+    ansible.builtin.include_role:
+      name: package_hold_exporter
+    vars:
+      package_hold_exporter_state: absent
+  - name: Verify code removed
+    ansible.builtin.stat:
+      path: /usr/local/libexec/package-hold-exporter.py
+    register: package_hold_test_removed
+  - name: Assert absence
+    ansible.builtin.assert:
+      that: not package_hold_test_removed.stat.exists

@@ -1,0 +1,23 @@
+---
+- name: config.yml - Query or ensure native holds
+  package_hold:
+    packages: "{{ package_hold_control_resolved }}"
+    state: "{{ 'held' if package_hold_control_mode == 'remediate' else 'query' }}"
+    command_timeout_seconds: "{{ package_hold_control_command_timeout_seconds }}"
+    lock_timeout_seconds: "{{ package_hold_control_lock_timeout_seconds }}"
+  register: package_hold_control_query
+  failed_when: false
+- name: config.yml - Publish current-run structured result
+  ansible.builtin.set_fact:
+    package_hold_control_result: >-
+      {{ package_hold_control_query | combine({
+        'run_id': hostvars['localhost'].package_hold_report_run_id | default('standalone'),
+        'failed': (package_hold_control_query.errors | default([]) | length > 0 or
+                   package_hold_control_query.packages | default([]) | selectattr('error') | list | length > 0 or
+                   package_hold_control_query.packages is not defined)}) }}
+- name: config.yml - Fail standalone role on checking errors
+  ansible.builtin.fail:
+    msg: "{{ package_hold_control_result }}"
+  when:
+    - package_hold_control_result.failed | default(false) or package_hold_control_result.errors | default([]) | length > 0 or package_hold_control_result.packages | default([]) | selectattr('error') | list | length > 0
+    - hostvars['localhost'].package_hold_report_run_id is not defined

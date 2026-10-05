@@ -1,0 +1,437 @@
+{
+  "provenance": "Synthetic contract examples; not captured on target OS. Executed by both independent adapters.",
+  "cases": [
+    {
+      "case": "redos_held",
+      "os": "redos",
+      "backend": "dnf_versionlock",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\t0\t1.0\t1\tx86_64\n",
+          "stderr": ""
+        },
+        "prerequisite_available": true,
+        "locklist": "nginx-0:1.0-1.*\n",
+        "plugin_config": "[main]\nenabled=1\nlocklist=/etc/dnf/plugins/versionlock.list\n",
+        "dnf_config": "[main]\nplugins=1\n"
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "held",
+          "error_code": null
+        }
+      ],
+      "expected_host_error": null
+    },
+    {
+      "case": "redos_unheld",
+      "os": "redos",
+      "backend": "dnf_versionlock",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\t0\t1.0\t1\tx86_64\n",
+          "stderr": ""
+        },
+        "prerequisite_available": true,
+        "locklist": "",
+        "plugin_config": "[main]\nenabled=1\nlocklist=/etc/dnf/plugins/versionlock.list\n",
+        "dnf_config": "[main]\nplugins=1\n"
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "unheld",
+          "error_code": null
+        }
+      ],
+      "expected_host_error": null
+    },
+    {
+      "case": "redos_absent",
+      "os": "redos",
+      "backend": "dnf_versionlock",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        "prerequisite_available": true,
+        "locklist": "nginx-0:1.0-1.*\n",
+        "plugin_config": "[main]\nenabled=1\nlocklist=/etc/dnf/plugins/versionlock.list\n",
+        "dnf_config": "[main]\nplugins=1\n"
+      },
+      "expected_packages": [],
+      "expected_host_error": null
+    },
+    {
+      "case": "redos_malformed",
+      "os": "redos",
+      "backend": "dnf_versionlock",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\t0\t1.0\t1\tx86_64\n",
+          "stderr": ""
+        },
+        "prerequisite_available": true,
+        "locklist": "<<<malformed>>>\n",
+        "plugin_config": "[main]\nenabled=1\nlocklist=/etc/dnf/plugins/versionlock.list\n",
+        "dnf_config": "[main]\nplugins=1\n"
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "unknown",
+          "error_code": "malformed_output"
+        }
+      ],
+      "expected_host_error": null
+    },
+    {
+      "case": "redos_missing_prerequisite",
+      "os": "redos",
+      "backend": "dnf_versionlock",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\t0\t1.0\t1\tx86_64\n",
+          "stderr": ""
+        },
+        "prerequisite_available": false,
+        "locklist": "nginx-0:1.0-1.*\n",
+        "plugin_config": "[main]\nenabled=1\nlocklist=/etc/dnf/plugins/versionlock.list\n",
+        "dnf_config": "[main]\nplugins=1\n"
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "unknown",
+          "error_code": "prerequisite_missing"
+        }
+      ],
+      "expected_host_error": null
+    },
+    {
+      "case": "astra_held",
+      "os": "astra",
+      "backend": "dpkg_selections",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\tamd64\thold ok installed\n",
+          "stderr": ""
+        },
+        "prerequisite_available": true
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "held",
+          "error_code": null
+        }
+      ],
+      "expected_host_error": null
+    },
+    {
+      "case": "astra_unheld",
+      "os": "astra",
+      "backend": "dpkg_selections",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\tamd64\tinstall ok installed\n",
+          "stderr": ""
+        },
+        "prerequisite_available": true
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "unheld",
+          "error_code": null
+        }
+      ],
+      "expected_host_error": null
+    },
+    {
+      "case": "astra_absent",
+      "os": "astra",
+      "backend": "dpkg_selections",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        "prerequisite_available": true
+      },
+      "expected_packages": [],
+      "expected_host_error": null
+    },
+    {
+      "case": "astra_malformed",
+      "os": "astra",
+      "backend": "dpkg_selections",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\tamd64\tbroken\n",
+          "stderr": ""
+        },
+        "prerequisite_available": true
+      },
+      "expected_packages": [],
+      "expected_host_error": "malformed_output"
+    },
+    {
+      "case": "astra_missing_prerequisite",
+      "os": "astra",
+      "backend": "dpkg_selections",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\tamd64\tinstall ok installed\n",
+          "stderr": ""
+        },
+        "prerequisite_available": false
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "unknown",
+          "error_code": "prerequisite_missing"
+        }
+      ],
+      "expected_host_error": null
+    },
+    {
+      "case": "alt_held",
+      "os": "alt",
+      "backend": "alt_rpm_hold",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\t0\t1.0\t1\tx86_64\n",
+          "stderr": ""
+        },
+        "prerequisite_available": true,
+        "apt_config_dump": {
+          "rc": 0,
+          "stdout": "RPM::Hold \"\";\nRPM::Hold:: \"^nginx$\";\n",
+          "stderr": ""
+        }
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "held",
+          "error_code": null
+        }
+      ],
+      "expected_host_error": null
+    },
+    {
+      "case": "alt_unheld",
+      "os": "alt",
+      "backend": "alt_rpm_hold",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\t0\t1.0\t1\tx86_64\n",
+          "stderr": ""
+        },
+        "prerequisite_available": true,
+        "apt_config_dump": {
+          "rc": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "unheld",
+          "error_code": null
+        }
+      ],
+      "expected_host_error": null
+    },
+    {
+      "case": "alt_absent",
+      "os": "alt",
+      "backend": "alt_rpm_hold",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        "prerequisite_available": true,
+        "apt_config_dump": {
+          "rc": 0,
+          "stdout": "RPM::Hold \"\";\nRPM::Hold:: \"^nginx$\";\n",
+          "stderr": ""
+        }
+      },
+      "expected_packages": [],
+      "expected_host_error": null
+    },
+    {
+      "case": "alt_malformed",
+      "os": "alt",
+      "backend": "alt_rpm_hold",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\t0\t1.0\t1\tx86_64\n",
+          "stderr": ""
+        },
+        "prerequisite_available": true,
+        "apt_config_dump": {
+          "rc": 0,
+          "stdout": "<<<malformed>>>\n",
+          "stderr": ""
+        }
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "unknown",
+          "error_code": "malformed_output"
+        }
+      ],
+      "expected_host_error": null
+    },
+    {
+      "case": "alt_missing_prerequisite",
+      "os": "alt",
+      "backend": "alt_rpm_hold",
+      "resolved_packages": [
+        {
+          "id": "nginx",
+          "name": "nginx"
+        }
+      ],
+      "inputs": {
+        "installed_query": {
+          "rc": 0,
+          "stdout": "nginx\t0\t1.0\t1\tx86_64\n",
+          "stderr": ""
+        },
+        "prerequisite_available": false,
+        "apt_config_dump": {
+          "rc": 0,
+          "stdout": "RPM::Hold \"\";\nRPM::Hold:: \"^nginx$\";\n",
+          "stderr": ""
+        }
+      },
+      "expected_packages": [
+        {
+          "id": "nginx",
+          "package": "nginx",
+          "state": "unknown",
+          "error_code": "prerequisite_missing"
+        }
+      ],
+      "expected_host_error": null
+    }
+  ]
+}

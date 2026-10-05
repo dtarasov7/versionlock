@@ -1,0 +1,11 @@
+---
+scrape_configs:
+- job_name: package-hold
+  scrape_interval: 30s
+  scrape_timeout: 5s
+  static_configs:
+  - targets:
+    - redos01.example.test:9817
+    labels:
+      env: production
+      group: linux

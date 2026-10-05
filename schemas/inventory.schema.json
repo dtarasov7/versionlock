@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "package_hold_packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "names": {
+            "type": "object",
+            "properties": {
+              "redos": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.+-]{0,254}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "astra": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.+-]{0,254}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "alt": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.+-]{0,254}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "redos",
+              "astra",
+              "alt"
+            ],
+            "additionalProperties": false,
+            "not": {
+              "properties": {
+                "redos": {
+                  "type": "null"
+                },
+                "astra": {
+                  "type": "null"
+                },
+                "alt": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "redos",
+                "astra",
+                "alt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "names"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1024
+    }
+  },
+  "required": [
+    "package_hold_packages"
+  ],
+  "additionalProperties": false
+}

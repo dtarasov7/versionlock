@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.+-]{0,254}$"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 1024
+    },
+    "backend": {
+      "enum": [
+        "dnf_versionlock",
+        "dpkg_selections",
+        "alt_rpm_hold"
+      ]
+    },
+    "state": {
+      "enum": [
+        "query",
+        "held",
+        "unheld"
+      ],
+      "default": "query"
+    },
+    "command_timeout_seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 30
+    },
+    "lock_timeout_seconds": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 10
+    }
+  },
+  "required": [
+    "packages"
+  ],
+  "additionalProperties": false
+}

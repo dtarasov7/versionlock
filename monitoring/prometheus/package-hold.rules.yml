@@ -1,0 +1,37 @@
+---
+# Persistent evidence is produced by the scanner: >=3 consecutive unheld scans
+# spanning >scan_interval_seconds. Scrapes cannot advance this evidence. With 300s
+# scans a single unheld interval never matches the primary expression.
+# The freshness join suppresses old evidence; for: 1m delays firing on new evidence.
+# An attempt-marker gap resets pending/firing alerts. Scanner alerts wait 1m so a normal
+# <=60s scan is allowed to complete before a health alert fires.
+groups:
+- name: package-hold
+  interval: 30s
+  rules:
+  - record: package_hold:scanner_fresh
+    expr: (package_hold_cache_valid == bool 1) * on(job, instance) (package_hold_scan_last_completed_timestamp_seconds
+      > bool 0) * on(job, instance) ((time() - package_hold_scan_last_completed_timestamp_seconds) >=
+      bool 0) * on(job, instance) ((time() - package_hold_scan_last_completed_timestamp_seconds) <= bool
+      package_hold_scan_stale_after_seconds)
+  - alert: PackageHoldPersistentUnheld
+    expr: (package_hold_persistent_unheld == 1) and on(job, instance) (package_hold:scanner_fresh == 1)
+      and on(job, instance) (up == 1)
+    for: 1m
+    labels:
+      severity: warning
+  - alert: PackageHoldScannerFailed
+    expr: (package_hold_scan_success == 0) and on(job, instance) (up == 1)
+    for: 1m
+    labels:
+      severity: warning
+  - alert: PackageHoldScannerStale
+    expr: (package_hold:scanner_fresh == 0) and on(job, instance) (up == 1)
+    for: 1m
+    labels:
+      severity: warning
+  - alert: PackageHoldCacheInvalid
+    expr: (package_hold_cache_valid == 0) and on(job, instance) (up == 1)
+    for: 1m
+    labels:
+      severity: warning

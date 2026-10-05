@@ -1,0 +1,25 @@
+[Unit]
+Description=Package hold cache-only Prometheus HTTP exporter
+After=network.target
+
+[Service]
+Type=simple
+User={{ package_hold_exporter_user }}
+Group={{ package_hold_exporter_group }}
+ExecStart={{ package_hold_exporter_python }} {{ package_hold_exporter_binary_path }} serve --config {{ package_hold_exporter_config_path }}
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=10s
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+ReadOnlyPaths={{ package_hold_exporter_status_path | dirname }} {{ package_hold_exporter_config_path | dirname }}
+UMask=0022
+
+[Install]
+WantedBy=multi-user.target

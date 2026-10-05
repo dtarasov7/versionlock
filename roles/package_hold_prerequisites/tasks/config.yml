@@ -1,0 +1,17 @@
+---
+- name: config.yml - Inspect and optionally remediate capabilities
+  package_hold_prerequisite:
+    mode: "{{ package_hold_prerequisites_mode }}"
+    command_timeout_seconds: "{{ package_hold_prerequisites_command_timeout_seconds }}"
+    dnf_plugin_package: "{{ package_hold_prerequisites_dnf_plugin_package }}"
+  register: package_hold_prerequisites_probe
+- name: config.yml - Publish current-run capability result
+  ansible.builtin.set_fact:
+    package_hold_prerequisites_result: >-
+      {{ package_hold_prerequisites_probe | combine({'run_id': hostvars['localhost'].package_hold_report_run_id | default('standalone')}) }}
+- name: config.yml - Fail standalone role on unavailable capabilities
+  ansible.builtin.fail:
+    msg: "{{ package_hold_prerequisites_result }}"
+  when:
+    - not package_hold_prerequisites_result.success
+    - hostvars['localhost'].package_hold_report_run_id is not defined

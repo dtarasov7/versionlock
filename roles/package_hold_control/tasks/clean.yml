@@ -1,0 +1,4 @@
+---
+# Only explicit clean play, never regular state=absent.
+- name: clean.yml - End cleanup play
+  ansible.builtin.meta: end_play

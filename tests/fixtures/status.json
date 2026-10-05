@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "scan_id": "12345678-1234-4234-8234-123456789abc",
+  "boot_id": "12345678-1234-4234-8234-123456789abd",
+  "config_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "last_attempt_at": 1700000000,
+  "last_completed_at": 1700000001,
+  "last_success_at": 1700000001,
+  "scan_success": true,
+  "scan_duration_seconds": 1,
+  "packages": [
+    {
+      "id": "nginx",
+      "package": "nginx",
+      "method": "dpkg_selections",
+      "state": "held",
+      "error": null,
+      "unheld_streak": 0,
+      "unheld_since": 0,
+      "persistent_unheld": false
+    }
+  ],
+  "errors": []
+}

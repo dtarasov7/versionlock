@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  author: Versionlock contributors
+  description: package hold prerequisites
+  license: MIT
+  min_ansible_version: '2.13'
+dependencies: []

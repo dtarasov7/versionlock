@@ -1,0 +1,85 @@
+---
+rule_files:
+- package-hold.rules.yml
+evaluation_interval: 30s
+tests:
+- name: single unheld scan, repeated scrapes
+  interval: 30s
+  input_series:
+  - &id001
+    series: up{job="package-hold",instance="host:9817"}
+    values: 1+0x40
+  - &id002
+    series: package_hold_cache_valid{job="package-hold",instance="host:9817"}
+    values: 1+0x40
+  - &id003
+    series: package_hold_scan_stale_after_seconds{job="package-hold",instance="host:9817"}
+    values: 662+0x40
+  - &id004
+    series: package_hold_scan_last_completed_timestamp_seconds{job="package-hold",instance="host:9817"}
+    values: 0+30x40
+  - series: package_hold_persistent_unheld{job="package-hold",instance="host:9817",package_id="nginx",package="nginx",method="dpkg_selections"}
+    values: 0+0x40
+  alert_rule_test:
+  - eval_time: 12m
+    alertname: PackageHoldPersistentUnheld
+    exp_alerts: []
+- name: persistent after third scan
+  interval: 30s
+  input_series:
+  - *id001
+  - *id002
+  - *id003
+  - *id004
+  - series: package_hold_persistent_unheld{job="package-hold",instance="host:9817",package_id="nginx",package="nginx",method="dpkg_selections"}
+    values: 0+0x19 1+0x20
+  alert_rule_test:
+  - eval_time: 12m
+    alertname: PackageHoldPersistentUnheld
+    exp_alerts:
+    - exp_labels:
+        job: package-hold
+        instance: host:9817
+        package_id: nginx
+        package: nginx
+        method: dpkg_selections
+        severity: warning
+- name: stale persistent cache suppressed
+  interval: 30s
+  input_series:
+  - series: up{job="package-hold",instance="host:9817"}
+    values: 1+0x40
+  - series: package_hold_cache_valid{job="package-hold",instance="host:9817"}
+    values: 1+0x40
+  - series: package_hold_scan_stale_after_seconds{job="package-hold",instance="host:9817"}
+    values: 662+0x40
+  - series: package_hold_scan_last_completed_timestamp_seconds{job="package-hold",instance="host:9817"}
+    values: 1+0x40
+  - series: package_hold_persistent_unheld{job="package-hold",instance="host:9817",package_id="nginx",package="nginx",method="dpkg_selections"}
+    values: 1+0x40
+  alert_rule_test:
+  - eval_time: 13m
+    alertname: PackageHoldPersistentUnheld
+    exp_alerts: []
+  - eval_time: 13m
+    alertname: PackageHoldScannerStale
+    exp_alerts:
+    - exp_labels:
+        job: package-hold
+        instance: host:9817
+        severity: warning
+- name: scanner failure
+  interval: 30s
+  input_series:
+  - series: up{job="package-hold",instance="host:9817"}
+    values: 1+0x10
+  - series: package_hold_scan_success{job="package-hold",instance="host:9817"}
+    values: 0+0x10
+  alert_rule_test:
+  - eval_time: 2m
+    alertname: PackageHoldScannerFailed
+    exp_alerts:
+    - exp_labels:
+        job: package-hold
+        instance: host:9817
+        severity: warning

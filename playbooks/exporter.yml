@@ -1,0 +1,7 @@
+---
+- name: Manage package hold exporter lifecycle
+  hosts: package_hold_targets
+  gather_facts: false
+  become: true
+  roles:
+    - package_hold_exporter
